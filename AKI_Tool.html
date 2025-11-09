@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="de"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAN-AKI KDIGO Tool</title>
+</head>
+<body>
+    <p>Urinausscheidung in den ersten 72h postoperativ (ml/kg/h):</p>
+    <p>Körpergewicht Baseline (kg) <input type="number" size="1" id="pat_gewicht"><br></p>
+    <p>Beginn der Aufzeichnung <input type="datetime-local" size="1" id="datetime_begin"><br></p>
+    <p>Urinausscheidung via Katheter (ml/h) </p>
+
+    <div id="tbl_container"></div>
+    <div id="tbl_container_input"></div>
+    <div id="tbl_6h"></div>
+    <div id="tbl_12h"></div>
+    <div id="tbl_24h"></div>
+     <div id="tbl_anu"></div>
+     <p>Ausscheidung ≥ 6h</p><div id="six_cut"></div><p></p>
+     <p>Ausscheidung ≥ 12h</p><div id="twelve_cut"></div><p></p>
+     <p>Ausscheidung ≥ 24h</p><div id="twentyfour_cut"></div><p></p>
+     <p>Anurie für ≥ 12h</p>
+     <br><p>Kreatinin:</p>
+     <div id="tbl_krea"></div>
+     <div id="tbl_krea_input"></div>
+     <div id="tbl_krea_input1"></div>
+     <div id="tbl_krea_inf"></div>
+     <div id="tbl_krea_inf1"></div>
+     <div id="tbl_krea_inf2"></div>     
+     <div id="tbl_krea_inf3"></div>  
+     <div id="tbl_krea_inf4"></div>  
+
+<script>
+    const tbl_reihe = 72;    //Anz. an Reihen in der Uri Tabelle 
+    const tbl_zeile = 2;     //Anz. der Zeilen in der Uri Tabelle
+    const tbl_reihe_krea = 8;//Anz. an Reihen in der Krea Tabelle
+
+    var tbl_krea = document.createElement("table") 
+    var krea_tr = document.createElement("tr")
+
+     for (let h = 0; h < tbl_reihe_krea; h++) {  //Krea Tabelle
+        let td = document.createElement("td");
+        if(h == 0) {                             
+            td.textContent = "";
+        }
+        else if(h == 1) {
+            td.textContent = "Baseline";
+        } else {
+            td.textContent = "Wert " + (h) + ":";
+        }
+        krea_tr.appendChild(td);
+    }
+    tbl_krea.appendChild(krea_tr);
+    document.getElementById("tbl_krea").appendChild(tbl_krea);
+
+    let input_tr_krea = document.createElement("tr");
+    for (let i = 0; i < tbl_reihe_krea; i++) {
+        let td = document.createElement("td");
+        let input = document.createElement("input");
+        
+        if(i == 0){
+            td.textContent ="Serum-Kreatinin (mg/dl)";
+            input_tr_krea.appendChild(td);
+        } else{
+            input.type = "text";
+            input.size = "1"
+            input.id = "k_row"+(i+1);
+            input_tr_krea.appendChild(td);
+            td.appendChild(input);
+        }
+    }
+    
+    tbl_krea.appendChild(input_tr_krea);
+    document.getElementById("tbl_krea_input").appendChild(tbl_krea);
+
+     let input_tr_krea_1 = document.createElement("tr");
+    for (let i = 0; i < tbl_reihe_krea; i++) {
+        let td = document.createElement("td");
+        let input = document.createElement("input");
+        if(i == 0){
+            td.textContent ="Datum, Uhrzeit";
+            input_tr_krea_1.appendChild(td);
+        } else {
+            input.type = "datetime-local";
+            input.lang = "de";
+            input.size = "1"
+            input.id = "k_row1"+(i+1);
+            input_tr_krea_1.appendChild(td);
+            td.appendChild(input);
+            }        
+    }
+
+    tbl_krea.appendChild(input_tr_krea_1);
+    document.getElementById("tbl_krea_input1").appendChild(tbl_krea);    
+
+    let tbl_krea_inf_tr = document.createElement("tr");
+    for (let i = 0; i < tbl_reihe_krea; i++) {
+        let td = document.createElement("td");
+        
+        td.type = "text";
+        td.size = "1"
+        td.id = (i+1) + "k_row2";
+        td.textContent = " ";
+        tbl_krea_inf_tr.appendChild(td);
+    }
+    tbl_krea.appendChild(tbl_krea_inf_tr);
+    document.getElementById("tbl_krea_inf").appendChild(tbl_krea);
+
+    let tbl_krea_inf1_tr = document.createElement("tr");
+    for (let i = 0; i < tbl_reihe_krea; i++) {
+        let td = document.createElement("td");
+        
+        td.type = "text";
+        td.size = "1"
+        td.id = (i+1) + "k_row3";
+        td.textContent = " ";
+        tbl_krea_inf1_tr.appendChild(td);
+    }
+    tbl_krea.appendChild(tbl_krea_inf1_tr);
+    document.getElementById("tbl_krea_inf1").appendChild(tbl_krea);    
+
+    let tbl_krea_inf2_tr = document.createElement("tr");
+    for (let i = 0; i < tbl_reihe_krea; i++) {
+        let td = document.createElement("td");
+        
+        td.type = "text";
+        td.size = "1"
+        td.id = (i+1) + "k_row4";
+        td.textContent = " ";
+        tbl_krea_inf2_tr.appendChild(td);
+    }
+    tbl_krea.appendChild(tbl_krea_inf2_tr);
+    document.getElementById("tbl_krea_inf2").appendChild(tbl_krea);    
+
+    let tbl_krea_inf3_tr = document.createElement("tr");
+    for (let i = 0; i < tbl_reihe_krea; i++) {
+        let td = document.createElement("td");
+        
+        td.type = "text";
+        td.size = "1"
+        td.id = (i+1) + "k_row5";
+        td.textContent = " ";
+        tbl_krea_inf3_tr.appendChild(td);
+    }
+    tbl_krea.appendChild(tbl_krea_inf3_tr);
+    document.getElementById("tbl_krea_inf3").appendChild(tbl_krea);    
+
+    let tbl_krea_inf4_tr = document.createElement("tr");
+    for (let i = 0; i < tbl_reihe_krea; i++) {
+        let td = document.createElement("td");
+        
+        td.type = "text";
+        td.size = "1"
+        td.id = (i+1) + "k_row6";
+        td.textContent = " ";
+        tbl_krea_inf4_tr.appendChild(td);
+    }
+    tbl_krea.appendChild(tbl_krea_inf4_tr);
+    document.getElementById("tbl_krea_inf4").appendChild(tbl_krea);  
+
+
+    //URIN TABLE
+    var tbl = document.createElement("table");
+    var uhrzeit_tr = document.createElement("tr");
+    var zahlen_tr = document.createElement("tr");
+    var datum_tr = document.createElement("tr");
+    
+     for (let i = 0; i < tbl_reihe; i++) { 
+        let td = document.createElement("td");
+        td.id = (i+1)+"date";
+        td.textContent = "";
+        datum_tr.classList.add("no-border-row");
+        datum_tr.appendChild(td);
+    }
+    tbl.appendChild(datum_tr);
+    document.getElementById("tbl_container").appendChild(tbl);
+                                            
+    for (let i = 0; i < tbl_reihe; i++) { 
+        let td = document.createElement("td");
+        td.id = (i+1)+"r1";
+        td.textContent = i+1;
+        zahlen_tr.appendChild(td);
+    }
+    tbl.appendChild(zahlen_tr);
+    document.getElementById("tbl_container").appendChild(tbl);
+    
+     const datum = document.getElementById("datetime_begin").value; 
+        for (let i = 0; i < tbl_reihe; i++) { 
+        let td = document.createElement("td");
+        let td_r1 = document.getElementById((i+1) +"r1");
+        let td_r2 = document.getElementById("row"+(i+1));
+        td.id = "uhr"+(i+1);
+        const base = new Date(datum);
+        const cellDate = new Date(base.getTime() + i*3600_000);
+        const hh_num = cellDate.getHours();
+        const hh = String(cellDate.getHours()).padStart(2, '0');
+        const mm = String(cellDate.getMinutes()).padStart(2, '0');
+        td.textContent = `${hh}:${mm}`;
+        uhrzeit_tr.appendChild(td);
+    }
+    tbl.appendChild(uhrzeit_tr);
+    document.getElementById("tbl_container").appendChild(tbl);
+
+    let input_tr = document.createElement("tr");
+    for (let i = 0; i < tbl_reihe; i++) {
+        let td = document.createElement("td");
+        let input = document.createElement("input");
+        
+        input.type = "text";
+        input.size = "1"
+        input.id = "row"+(i+1);
+        input_tr.appendChild(td);
+        td.appendChild(input);
+    }
+    tbl.appendChild(input_tr);
+    document.getElementById("tbl_container_input").appendChild(tbl);
+
+    let sixh_tr = document.createElement("tr");
+    for (let i = 0; i < tbl_reihe; i++) {
+        let td = document.createElement("td");
+        if(i === 0){
+              td.type = "text";
+            td.size = "1"
+            td.id = (i+1) + "six";
+            td.textContent = "Stadium 1";
+            td.bgColor = "#E3D394";
+        sixh_tr.appendChild(td);
+        } else{ 
+        td.type = "text";
+        td.size = "1"
+        td.id = (i+1) + "six";
+        td.textContent = " ";
+        sixh_tr.appendChild(td);
+        }
+    }
+    tbl.appendChild(sixh_tr);
+    document.getElementById("tbl_6h").appendChild(tbl);
+
+    let twelveh_tr = document.createElement("tr");
+    for (let i = 0; i < tbl_reihe; i++) {
+        let td = document.createElement("td");
+        if(i === 0){
+            td.type = "text";
+            td.size = "1"
+            td.id = (i+1) + "twelve";
+            td.textContent = "Stadium 2"
+            td.bgColor = "#DBBA35";
+        } else{ 
+            td.type = "text";
+            td.size = "1"
+            td.id = (i+1) + "twelve";
+        }
+        
+
+        twelveh_tr.appendChild(td);
+    }
+    tbl.appendChild(twelveh_tr);
+    document.getElementById("tbl_12h").appendChild(tbl);
+
+    let twentyfourh_tr = document.createElement("tr");
+    for (let i = 0; i < tbl_reihe; i++) {
+        let td = document.createElement("td");
+        if(i === 0){
+            td.type = "text";
+            td.size = "1"
+            td.style.color = "white";
+            td.id = (i+1) + "tf";
+            td.textContent ="Stadium 3" 
+            td.bgColor = "#453A0D";
+        } else{ 
+         td.type = "text";
+        td.size = "1"
+        td.style.color = "white";
+        td.id = (i+1) + "tf";
+        }
+       
+
+        twentyfourh_tr.appendChild(td);
+    }
+    tbl.appendChild(twentyfourh_tr);
+    document.getElementById("tbl_24h").appendChild(tbl);
+
+        let anu_tr = document.createElement("tr");
+    for (let i = 0; i < tbl_reihe; i++) {
+        let td = document.createElement("td");
+        if(i === 0){
+        td.type = "text";
+        td.style.color = "white";
+        td.size = "1"
+        td.id = (i+1) + "anu";
+        td.textContent = "Stadium 3"
+        td.bgColor = "#453A0D";
+        } else{ 
+         td.type = "text";
+        td.style.color = "white";
+        td.size = "1"
+        td.id = (i+1) + "anu";
+        }
+        anu_tr.appendChild(td);
+    }
+    tbl.appendChild(anu_tr);
+    document.getElementById("tbl_anu").appendChild(tbl);
+    for (let i = 0; i < tbl_reihe; i++) { 
+        let td_r1 = document.getElementById((i+1) +"r1");
+        let td_r2 = document.getElementById("row"+(i+1)).parentElement;
+        let td_r3 = document.getElementById((i+1) + "six");
+        let td_r4 = document.getElementById("uhr"+(i+1));
+        let td_r5 = document.getElementById((i+1) + "six");
+        let td_r6 = document.getElementById((i+1) + "twelve");
+        let td_r7 = document.getElementById((i+1) + "tf");
+        let td_r8 = document.getElementById((i+1) + "anu");
+        const base = new Date(datum);
+        const cellDate = new Date(base.getTime() + i*3600_000);
+        const hh_num = cellDate.getHours();
+        let datum_feld = document.getElementById((i+1)+"date");
+        if(i === 0){
+            datum_feld.textContent = cellDate.getDate() +"."+ Number(cellDate.getMonth()+1) + "." + cellDate.getFullYear();
+        }
+        if(hh_num === 0)
+        {
+            td_r1.style.borderLeft = "3px solid black";
+            td_r2.style.borderLeft = "3px solid black";
+            td_r3.style.borderLeft = "3px solid black";
+            td_r4.style.borderLeft = "3px solid black";
+            td_r5.style.borderLeft = "3px solid black";
+            td_r6.style.borderLeft = "3px solid black";
+            td_r7.style.borderLeft = "3px solid black";
+            td_r8.style.borderLeft = "3px solid black";
+            datum_feld.style.borderLeft = "3px solid black";
+            datum_feld.textContent = cellDate.getDate() +"."+ Number(cellDate.getMonth()+1) + "." + cellDate.getFullYear();
+        }
+    }
+
+    let text1 = document.getElementById("1k_row2");
+    text1.textContent = "1,5- bis < 1.9-facher Anstieg innerhalb 7d";
+    let text2 = document.getElementById("1k_row3");
+    text2.textContent = "Anstieg ≥ 0,3 mg/dl innerhalb 48 h";
+    let text3 = document.getElementById("1k_row4");
+    text3.textContent = "2- bis < 2.9-facher Anstieg";
+    let text4 = document.getElementById("1k_row5");
+    text4.textContent = "≥ 3-facher Anstieg";
+    let text5 = document.getElementById("1k_row6");
+    text5.textContent = "≥ 4 mg/dl bei akutem Anstieg um mind. 0,5 mg/dl";  
+    document.getElementById("tbl_krea").appendChild(tbl_krea);  
+</script>
+
+<script>
+    function resetBorders() {
+    for (let i = 0; i < tbl_reihe; i++) { 
+        let td_r1 = document.getElementById((i+1) +"r1");
+        let td_r2 = document.getElementById("row"+(i+1)).parentElement;
+        let td_r3 = document.getElementById((i+1) + "six");
+        let td_r4 = document.getElementById("uhr"+(i+1));
+        let td_r5 = document.getElementById((i+1) + "six");
+        let td_r6 = document.getElementById((i+1) + "twelve");
+        let td_r7 = document.getElementById((i+1) + "tf");
+        let td_r8 = document.getElementById((i+1) + "anu");
+        let datum_feld = document.getElementById((i+1)+"date");
+
+            td_r1.style.borderLeft = "";
+            td_r2.style.borderLeft = "";
+            td_r3.style.borderLeft = "";
+            td_r4.style.borderLeft = "";
+            td_r5.style.borderLeft = "";
+            td_r6.style.borderLeft = "";
+            td_r7.style.borderLeft = "";
+            td_r8.style.borderLeft = "";
+            datum_feld.style.borderLeft = "";
+    }
+}
+
+    function Uhrzeit(){
+        resetBorders();
+        const datum = document.getElementById("datetime_begin").value; 
+        
+        for (let i = 0; i < tbl_reihe; i++) { 
+        var uhrzeit_td = document.getElementById("uhr"+(i+1));
+        const base = new Date(datum);
+        const cellDate = new Date(base.getTime() + i * 3600_000);
+        const hh_num = cellDate.getHours();
+        const hh = String(cellDate.getHours()).padStart(2, '0');
+        const mm = String(cellDate.getMinutes()).padStart(2, '0');
+        uhrzeit_td.textContent = `${hh}:${mm}`;
+        let td_r1 = document.getElementById((i+1) +"r1");
+        let td_r2 = document.getElementById("row"+(i+1)).parentElement;
+        let td_r3 = document.getElementById((i+1) + "six");
+        let td_r4 = document.getElementById("uhr"+(i+1));
+        let td_r5 = document.getElementById((i+1) + "six");
+        let td_r6 = document.getElementById((i+1) + "twelve");
+        let td_r7 = document.getElementById((i+1) + "tf");
+        let td_r8 = document.getElementById((i+1) + "anu");
+        let datum_feld = document.getElementById((i+1)+"date");
+         if(i === 0){
+            datum_feld.textContent = cellDate.getDate() +"."+ Number(cellDate.getMonth()+1) + "." + cellDate.getFullYear();
+        }
+        if(hh_num === 0)
+        {
+            td_r1.style.borderLeft = "3px solid black";
+            td_r2.style.borderLeft = "3px solid black";
+            td_r3.style.borderLeft = "3px solid black";
+            td_r4.style.borderLeft = "3px solid black";
+            td_r5.style.borderLeft = "3px solid black";
+            td_r6.style.borderLeft = "3px solid black";
+            td_r7.style.borderLeft = "3px solid black";
+            td_r8.style.borderLeft = "3px solid black";
+            datum_feld.style.borderLeft = "3px solid black";
+            datum_feld.textContent = cellDate.getDate() +"."+ Number(cellDate.getMonth()+1) + "." + cellDate.getFullYear();
+        }
+    
+    }
+}
+    function AKI() {
+        //URI TABLE
+        var pat_gew = document.getElementById("pat_gewicht").value;
+        const div6 = document.getElementById("six_cut");
+        const div12 = document.getElementById("twelve_cut");
+        const div24 = document.getElementById("twentyfour_cut");
+        div6.innerText = "< " + (pat_gew*0.5).toFixed(1) + "ml/h";
+        div12.innerText = "< " + (pat_gew*0.5).toFixed(1) + "ml/h";
+        div24.innerText = "< " + (pat_gew*0.3).toFixed(1) + "ml/h";
+
+        function getTIme(currDate, prevDate1, prevDate2){
+
+        }
+        
+        for (let i = 6; i <= tbl_reihe; i++){
+                  let section = 0
+                  for (let j = 0; j < 6; j++){
+ 
+                    section+= parseFloat(document.getElementById("row" + (i-j)).value) || 0;
+                  }
+                  let cell = document.getElementById(i + "six");
+                  if((section/6) < (pat_gew*0.5)){
+                  cell.bgColor = "#E3D394";
+                  cell.textContent = (section/6).toFixed(1);
+                  } else {
+                  cell.bgColor = "white";
+                  cell.textContent = ""
+                  }
+                 
+                  if(i >= 12){
+                  section = 0;
+                  for (let l = 0; l < 12; l++){
+ 
+                    section+= parseFloat(document.getElementById("row" + (i-l)).value) || 0;
+                  }
+                  let cell1 = document.getElementById(i + "twelve");
+                  let cell3 = document.getElementById(i + "anu");
+                  if((section/12) < (pat_gew*0.5)){
+                  cell1.bgColor = "#DBBA35";
+                  cell1.textContent = (section/12).toFixed(1);
+                  if(section == 0) {
+                  cell3.textContent = 0;
+                  cell3.bgColor = "#453A0D"
+                  } else{
+                    cell3.textContent = "";
+                    cell3.bgColor = "white"
+                  }
+                  } 
+                  else {
+                  cell1.bgColor = "white";
+                  cell1.textContent = "";
+                  }
+                  
+                  } 
+                  if(i >= 24){
+                    section = 0;
+                  for (let m = 0; m < 24; m++){
+ 
+                    section+= parseFloat(document.getElementById("row" + (i-m)).value) || 0;
+                  }
+                  let cell2 = document.getElementById(i + "tf");
+                  if((section/24) < (pat_gew*0.3)){
+                  cell2.bgColor = "#453A0D";
+                  cell2.textContent = (section/24).toFixed(1);
+                  } else {
+                  cell2.bgColor = "white";
+                  cell2.textContent = ""
+                  }
+                  } 
+            }
+
+            //KREATININ TABLE
+            var datumArray = []; //Array zur Speicherung der eingegebenen Daten
+
+            for (let i = 2; i <= tbl_reihe_krea; i++){
+                let dateInput = document.getElementById("k_row1"+(i)).value;
+                if(dateInput){
+                    datumArray[i-2] = new Date(dateInput);
+                }
+                
+            }
+            datumArray.sort(function(a, b){return a-b}); //Daten werden chronologisch sortiert
+            console.log(datumArray);
+
+            for (let i = 2; i < tbl_reihe_krea; i++){
+                let currDate = new Date(document.getElementById("k_row1"+(i+1)).value);
+                let currDateIndex;
+                let baselineValue = parseFloat(document.getElementById("k_row2").value) || 0;
+                let baselineDate = new Date(document.getElementById("k_row12").value);
+                let currValue = parseFloat(document.getElementById("k_row"+(i+1)).value) || 0;
+                let ms_48h = 48*60*60*1000;
+                let ms_7d = 7*24*60*60*1000;
+                if(baselineValue === 0 || isNaN(baselineValue)){
+                    break;
+                }
+                for(let j = 0; j < datumArray.length; j++){ //Finden des Index des aktuellen Datums in dem sortierten Array
+                if(datumArray[j].getTime() === currDate.getTime()){
+                if(datumArray[j].getTime() === datumArray[0].getTime() || datumArray[j] === null){
+                    continue;
+                } else {
+                    currDateIndex = j;
+                    continue;
+                }
+                }
+            }
+            //Stadium 3 (≥ 4 mg/dl bei akutem Anstieg um mind. 0,5 mg/dl) Kreatinin
+                console.log(currValue);
+          let cell8 = document.getElementById((i+1) + "k_row6");
+
+        
+    
+if(currValue >= 4){
+    let found = false;
+    for(let n = currDateIndex; n >= 0; n--){ // check newest previous values first
+        let pastValue2 = parseFloat(document.getElementById("k_row"+(n+2)).value) || 0;
+        if((currValue - pastValue2) >= 0.5){
+            cell8.bgColor = "#453A0D";
+            cell8.textContent = "Stadium 3";
+            found = true;
+            break;
+        }
+    }
+    if(!found && currDateIndex !== undefined){
+        cell8.textContent = "Anstieg < 0.5 mg/dl";
+        cell8.bgColor = "white";
+    }
+} else if (currValue < 4){
+    cell8.textContent = "Wert < 4 mg/dl";
+    cell8.bgColor = "white";
+    if(currDateIndex === undefined){
+        cell8.textContent = "invalides Datum";
+        cell8.bgColor = "white";
+    }
+} 
+            let cell4 = document.getElementById((i+1) + "k_row2");
+               //Stadium 1 (1.5-1.9x Baseline innerhalb 7d) Kreatinin
+                if(currValue >= baselineValue*1.5 && currValue <= baselineValue*1.9){ //Prüfung ob Stadium 1 erfüllt ist 
+                    console.log("Stage 1; Baselineanstieg erfüllt für " + currDate);
+                    console.log("currDateIndex: " + currDateIndex + " " + datumArray[currDateIndex]);
+                    if(Math.abs(datumArray[currDateIndex] - baselineDate) <= ms_7d) { //Prüfung ob Datum innerhalb 7 Tage
+                        console.log("Stage 1; 7 Tage Kriterium & Baselineanstieg erfüllt für " + currDate);
+                        cell4.bgColor = "#E3D394";
+                        cell4.textContent = "Stadium 1"; 
+                } else if(currDateIndex === undefined){
+                    cell4.textContent = "invalides Datum";
+                    cell4.bgColor = "white";
+                } else {
+                    cell4.textContent = ">7d";
+                    cell4.bgColor = "white";
+                }
+                } else if (currValue < baselineValue*1.5){
+                    cell4.textContent = "Anstieg < 1,5-fach"; 
+                    cell4.bgColor = "white";
+                } else if (currValue > baselineValue*1.9){
+                    cell4.textContent = "Anstieg > 1.9-fach";
+                    cell4.bgColor = "white"; 
+                }
+                //Stadium 1 (Anstieg ≥ 0.3 mg/dl innerhalb 48h) Kreatinin
+                let cell5 = document.getElementById((i+1) + "k_row3");
+                let found48h = false;
+
+                for (let m = currDateIndex - 1; m >= 0; m--) {
+                    const diff = datumArray[currDateIndex] - datumArray[m];
+  
+                if (diff <= ms_48h) {
+                    found48h = true;
+                    let pastValue = parseFloat(document.getElementById("k_row"+(m+2)).value) || 0;
+    
+                if ((currValue - pastValue) >= 0.3) {
+                    console.log("Stage 1; 48h Kriterium erfüllt");
+                    cell5.bgColor = "#E3D394";
+                    cell5.textContent = "Stadium 1";
+                } else {
+                      cell5.textContent = "Anstieg < 0,3 mg/dl";
+                      cell5.bgColor = "white";
+    }
+
+    break; 
+  }
+}
+
+if (!found48h) {
+  cell5.textContent = ">48h";
+  cell5.bgColor = "white";
+}
+                //Stadium 2 (2-2.9x Baseline) Kreatinin
+                let cell7 = document.getElementById((i+1) + "k_row4");
+                if(currValue >= baselineValue*2 && currValue <= baselineValue*2.9){ //Prüfung ob Stadium 2 erfüllt ist
+                    console.log("Stage 2 erfüllt für " + currDate);
+                    cell7.bgColor = "#DBBA35";
+                    cell7.textContent = "Stadium 2"; 
+                } else if (currValue < baselineValue*2){
+                    cell7.textContent = "Anstieg < 2-fach"; 
+                    cell7.bgColor = "white";
+                } else if (currValue > baselineValue*2.9){
+                    cell7.textContent = "Anstieg > 2.9-fach"; 
+                    cell7.bgColor = "white";
+                }
+                //Stadium 3 (≥ 3x Baseline) Kreatinin
+                let cell6 = document.getElementById((i+1) + "k_row5");
+                if(currValue >= baselineValue*3){ //Prüfung ob Stadium 3 erfüllt ist
+                    
+                    console.log("Stage 3 erfüllt für " + currDate);
+                    cell6.bgColor = "#453A0D";
+                    cell6.textContent = "Stadium 3"; 
+                } else {
+                    cell6.textContent = "Anstieg < 3-fach";
+                    
+                    cell6.bgColor = "white";
+                }
+                }
+                
+            }
+            for (let i = 2; i <= tbl_reihe_krea; i++){
+                let inputBox = document.getElementById("k_row"+(i));
+                if(isNaN(parseFloat(inputBox.value))){
+                    console.log("NaN detected");
+                }
+                
+            }
+
+
+
+            
+
+            /*
+            for (let i = 3; i <= tbl_reihe_krea; i++){
+                let cell4 = document.getElementById(i + "k_row2");
+                let baseline = parseFloat(document.getElementById("k_row2").value) || 0;
+                let current = parseFloat(document.getElementById("k_row"+(i)).value) || 0;
+                let current_date = new Date(document.getElementById("k_row1"+(i)).value) || 0;
+
+                if(baseline == 0){
+                    cell4.textContent = " ";
+                    cell4.bgColor = "white";
+                    continue;
+                }
+                if(current > baseline*1.5 && current < baseline*1.9){
+                   for(k=1; k < 7; k++){
+                    if(i-k < 2){
+                        continue;
+                    }
+                    if(i-k >= 2){
+                        let past_date = new Date(document.getElementById("k_row1" + (i-k)).value) || 0;
+                        if(Math.abs(current_date-past_date) <= 7*24*60*60*1000){
+                           cell4.bgColor = "#E3D394";
+                           cell4.textContent = "Stadium 1";   
+                          console.log("Stage 1");    
+                        } else {
+                            cell4.textContent = ">7d"
+                            cell4.bgColor = "white";
+                        }
+                        
+                    }
+                }            
+                } else if (current < baseline*1.9){
+                    cell4.textContent = "Anstieg ≤ 1,5-fach"; 
+                    cell4.bgColor = "white";
+                } else if (current > baseline*1.5){
+                    cell4.textContent = "Anstieg ≥ 1.9-fach";
+                    cell4.bgColor = "white"; 
+                }  
+                
+                let cell5 = document.getElementById(i + "k_row3");
+                if((current - baseline) >= 0.3){
+                    cell5.bgColor = "#E3D394";
+                    cell5.textContent = "Stadium 1";  
+                    console.log("Stage 1");
+                for(k=1; k < 7; k++){
+                    if(i-k < 2){
+                        continue;
+                    }
+                    if(i-k >= 2){
+                        let past_date = new Date(document.getElementById("k_row1" + (i-k)).value) || 0;
+                        if(Math.abs(current_date-past_date) <= 48*60*60*1000){
+
+                        } else {
+                            cell5.textContent = ">48h"
+                            cell5.bgColor = "white";
+                        }
+                        
+                    }
+                }
+                } else {
+                    cell5.textContent = "Anstieg < 0,3 mg/dl"; 
+                    cell5.bgColor = "white";
+                }
+                let cell6 = document.getElementById(i + "k_row4");
+                if(current >= baseline*2 && current < baseline*3){
+                    cell6.bgColor = "#DBBA35";
+                    cell6.textContent = "Stadium 2";  
+                    console.log("Stage 2");           
+                } else if (current < baseline*2){
+                    cell6.textContent = "Anstieg < 2-fach"; 
+                    cell6.bgColor = "white";
+                } else if (current >= baseline*2.9){
+                    cell6.textContent = "Anstieg ≥ 2.9-fach"; 
+                    cell6.bgColor = "white";
+                }
+                let cell7 = document.getElementById(i + "k_row5");
+                if(current >= baseline*3){
+                    cell7.bgColor = "#453A0D";
+                    cell7.textContent = "Stadium 3";  
+                    cell7.style.color = "white";
+                    console.log("Stage 3");           
+                } else if (current < baseline*3){
+                    cell7.style.color = "black";
+                    cell7.textContent = "Anstieg < 3-fach"; 
+                    cell7.bgColor = "white";
+                }
+            }
+            for (let i = 3; i <= tbl_reihe_krea; i++){
+                let cell5 = document.getElementById(i + "k_row6");
+                let baseline = parseFloat(document.getElementById("k_row2").value) || 0;
+                let current = parseFloat(document.getElementById("k_row"+(i)).value) || 0;
+                let last = parseFloat(document.getElementById("k_row"+(i-1)).value) || 0;
+
+                if(baseline == 0){
+                    cell5.textContent = " ";
+                    cell5.bgColor = "white";
+                    continue;
+                }
+                if(current >= 4 && (current-last) >= 0.5)   
+                {
+                    cell5.bgColor = "#453A0D";
+                    cell5.textContent = "Stadium 3";  
+                    cell5.style.color = "white";  
+                } else if (current < 4){
+                    cell5.style.color = "black";
+                    cell5.textContent = "Wert liegt unter 4mg/dl";
+                    cell5.bgColor = "white";
+                } else {
+                    cell5.style.color = "black";
+                    cell5.textContent = "Anstieg niedriger als 0.5mg/dl";
+                    cell5.bgColor = "white";
+                }
+        }
+    }
+        */
+    window.addEventListener("input", AKI);
+    window.addEventListener("input", Uhrzeit);
+  
+</script>
+
+<style>
+  table, td {
+    border: 1px solid black;   /* thin black outline */
+    border-collapse: collapse; /* prevents double borders */
+  }
+  td {
+    padding: 2px;              /* space inside each cell */
+    width: 20px;
+    height:20px;
+    text-align: center;
+  }
+  
+#tbl_krea td:first-child {
+    width: 160px; /* or whatever width you want */
+    text-align: left; /* optional, nicer for labels */
+}
+.no-border-row td {
+  border: none !important;
+  text-align: center;
+}
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+
+
+</style>
+
+</body></html>
